@@ -26,4 +26,13 @@ class CourseRepositoryIntTest(@Autowired val courseRepository: CourseRepository)
             .map<String>(Course::name)
             .contains("Starting SpringBoot 1", "Mastering SpringBoot 1")
     }
+
+    @Test
+    fun findByName() {
+        val results = courseRepository.findByName("SpringBoot")
+
+        assertThat(results)
+            .map<String>(Course::name)
+            .contains("Starting SpringBoot 1", "Mastering SpringBoot 1")
+    }
 }
