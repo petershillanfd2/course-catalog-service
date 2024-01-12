@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.*
 
+private const val COURSE_NAME_EXPRESSION = "SpringBoot"
+
 @ExtendWith(MockKExtension::class)
 class CourseServiceTest {
     @MockK
@@ -52,6 +54,29 @@ class CourseServiceTest {
 
         verify(exactly = 1) {
             courseRepositoryMock.findAll()
+        }
+    }
+
+    @Test
+    fun retrieveAllCoursesByName() {
+        every { courseRepositoryMock.findByNameContaining(COURSE_NAME_EXPRESSION) } returns
+                courseList().filter { c ->
+                    c.name.contains(
+                        COURSE_NAME_EXPRESSION
+                    )
+                }
+
+        val results = courseService.retrieveAllCourses(COURSE_NAME_EXPRESSION)
+
+        assertThat(results)
+            .isEqualTo(courseDTOList().filter { c ->
+                c.name.contains(
+                    COURSE_NAME_EXPRESSION
+                )
+            })
+
+        verify(exactly = 1) {
+            courseRepositoryMock.findByNameContaining(COURSE_NAME_EXPRESSION)
         }
     }
 

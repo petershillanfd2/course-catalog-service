@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
+private const val COURSE_NAME_EXPRESSION = "SpringBoot"
+
 @WebMvcTest(CourseController::class)
 @ActiveProfiles("test")
 class CourseControllerTest(@Autowired val mockMvc: MockMvc) {
@@ -83,6 +85,30 @@ class CourseControllerTest(@Autowired val mockMvc: MockMvc) {
         ).andExpect(status().isOk)
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$", hasSize<CourseDTO>(5)))
+            .andReturn().response.contentAsString
+
+        val results: List<CourseDTO> = asList(responseString)
+        assertThat(results).isEqualTo(courses)
+    }
+
+    @Test
+    fun retrieveAllCoursesByName() {
+        val courses = courseDTOList().filter { c ->
+            c.name.contains(
+                COURSE_NAME_EXPRESSION
+            )
+        }
+
+        every {
+            courseServiceMock.retrieveAllCourses(COURSE_NAME_EXPRESSION)
+        } returns courses
+
+        val responseString = mockMvc.perform(
+            get("/v1/courses")
+                .param("course_name", COURSE_NAME_EXPRESSION)
+        ).andExpect(status().isOk)
+            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$", hasSize<CourseDTO>(2)))
             .andReturn().response.contentAsString
 
         val results: List<CourseDTO> = asList(responseString)

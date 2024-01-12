@@ -11,17 +11,22 @@ import org.springframework.web.bind.annotation.*
 class CourseController(val courseService: CourseService) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun addCourse(@Valid @RequestBody courseDTO: CourseDTO): CourseDTO =
+    fun addCourse(@RequestBody @Valid courseDTO: CourseDTO): CourseDTO =
         courseService.addCourse(courseDTO)
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    fun retrieveAllCourses(): List<CourseDTO> = courseService.retrieveAllCourses()
+    fun retrieveAllCourses(
+        @RequestParam(
+            "course_name",
+            required = false
+        ) courseName: String?
+    ): List<CourseDTO> = courseService.retrieveAllCourses(courseName)
 
     @PutMapping("/{course_id}")
     @ResponseStatus(HttpStatus.OK)
     fun updateCourse(
-        @Valid @RequestBody courseDTO: CourseDTO,
+        @RequestBody @Valid courseDTO: CourseDTO,
         @PathVariable("course_id") courseId: Int
     ): CourseDTO = courseService.updateCourse(courseDTO, courseId)
 

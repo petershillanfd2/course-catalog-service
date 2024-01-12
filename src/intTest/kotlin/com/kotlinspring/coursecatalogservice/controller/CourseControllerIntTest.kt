@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.web.util.UriComponentsBuilder
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -85,6 +86,29 @@ class CourseControllerIntTest(
                 tuple("Starting Marketing 1", "Marketing"),
                 tuple("Starting Business 1", "Business"),
                 tuple("Starting Development 1", "Development"),
+                tuple("Starting SpringBoot 1", "Development"),
+                tuple("Mastering SpringBoot 1", "Development")
+            )
+    }
+
+    @Test
+    fun retrieveAllCoursesByName() {
+        val results = webTestClient.get()
+            .uri(
+                UriComponentsBuilder.fromUriString("/v1/courses")
+                    .queryParam("course_name", "SpringBoot").toUriString()
+            )
+            .exchange()
+            .expectStatus().isOk
+            .expectBodyList(CourseDTO::class.java)
+            .returnResult()
+            .responseBody
+
+        assertThat(results!!)
+            .isNotNull
+            .hasSize(2)
+            .map(CourseDTO::name, CourseDTO::category)
+            .containsOnly(
                 tuple("Starting SpringBoot 1", "Development"),
                 tuple("Mastering SpringBoot 1", "Development")
             )
