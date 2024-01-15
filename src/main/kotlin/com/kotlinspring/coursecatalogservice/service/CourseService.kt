@@ -16,14 +16,8 @@ class CourseService(
     private val logger = KotlinLogging.logger {}
 
     fun addCourse(courseDTO: CourseDTO): CourseDTO {
-        val instructorOptional = instructorService.findInstructorById(courseDTO.instructorId!!)
-
-        if (instructorOptional.isEmpty) {
-            throw InstructorNotFoundException("instructor not found for id: ${courseDTO.instructorId}")
-        }
-
         val course = courseDTO.let {
-            Course(null, it.name, it.category, instructorOptional.get())
+            instructorService.setCourseInstructor(Course(null, it.name, it.category), courseDTO.instructorId!!)
         }
 
         val savedCourse = courseRepository.save(course)

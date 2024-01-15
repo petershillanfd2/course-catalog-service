@@ -1,5 +1,6 @@
 package com.kotlinspring.coursecatalogservice.service
 
+import com.kotlinspring.coursecatalogservice.dto.CourseDTO
 import com.kotlinspring.coursecatalogservice.entity.Course
 import com.kotlinspring.coursecatalogservice.repository.CourseRepository
 import com.kotlinspring.coursecatalogservice.util.*
@@ -35,18 +36,20 @@ class CourseServiceTest {
 
     @Test
     fun addCourse() {
-        every { courseRepositoryMock.save(any<Course>()) } returns course()
-        every { instructorServiceMock.findInstructorById(any<Int>()) } returns Optional.of(
-            instructor()
-        )
+        val instructorDTO = instructorDTO()
+        val courseDTO = courseDTO(instructorDTO.id!!)
+        val course = course(instructorDTO.id!!)
 
-        val result = courseService.addCourse(courseDTO())
+        every { courseRepositoryMock.save(any<Course>()) } returns course()
+        every { instructorServiceMock.setCourseInstructor(any<Course>(), any<Int>()) } returns course
+
+        val result = courseService.addCourse(courseDTO)
         assertThat(result)
-            .isEqualTo(courseDTO())
+            .isEqualTo(courseDTO)
 
         verify(exactly = 1) {
             courseRepositoryMock.save(any<Course>())
-            instructorServiceMock.findInstructorById(any<Int>())
+            instructorServiceMock.setCourseInstructor(any<Course>(), any<Int>())
         }
     }
 

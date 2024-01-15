@@ -1,8 +1,6 @@
 package com.kotlinspring.coursecatalogservice.controller
 
-import com.kotlinspring.coursecatalogservice.dto.CourseDTO
 import com.kotlinspring.coursecatalogservice.dto.InstructorDTO
-import com.kotlinspring.coursecatalogservice.service.CourseService
 import com.kotlinspring.coursecatalogservice.service.InstructorService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -15,4 +13,9 @@ class InstructorController(val instructorService: InstructorService) {
     @ResponseStatus(HttpStatus.CREATED)
     fun createInstructor(@RequestBody @Valid instructorDTO: InstructorDTO): InstructorDTO =
         instructorService.createInstructor(instructorDTO)
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    fun getInstructor(@RequestParam("instructor_id") instructorId: Int) =
+        instructorService.findInstructorById(instructorId)
 }
