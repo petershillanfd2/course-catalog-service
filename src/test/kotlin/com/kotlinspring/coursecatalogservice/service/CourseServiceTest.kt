@@ -23,16 +23,22 @@ class CourseServiceTest {
     @MockK
     private lateinit var courseRepositoryMock: CourseRepository
 
+    @MockK
+    private lateinit var instructorServiceMock: InstructorService
+
     private lateinit var courseService: CourseService
 
     @BeforeEach
     fun setUp() {
-        courseService = CourseService(courseRepositoryMock)
+        courseService = CourseService(courseRepositoryMock, instructorServiceMock)
     }
 
     @Test
     fun addCourse() {
         every { courseRepositoryMock.save(any<Course>()) } returns course()
+        every { instructorServiceMock.findInstructorById(any<Int>()) } returns Optional.of(
+            instructor()
+        )
 
         val result = courseService.addCourse(courseDTO())
         assertThat(result)
@@ -40,6 +46,7 @@ class CourseServiceTest {
 
         verify(exactly = 1) {
             courseRepositoryMock.save(any<Course>())
+            instructorServiceMock.findInstructorById(any<Int>())
         }
     }
 

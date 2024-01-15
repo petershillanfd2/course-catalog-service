@@ -2,9 +2,8 @@ package com.kotlinspring.coursecatalogservice.controller
 
 import com.kotlinspring.coursecatalogservice.dto.CourseDTO
 import com.kotlinspring.coursecatalogservice.repository.CourseRepository
-import com.kotlinspring.coursecatalogservice.util.asObject
-import com.kotlinspring.coursecatalogservice.util.courseDTO
-import com.kotlinspring.coursecatalogservice.util.courseList
+import com.kotlinspring.coursecatalogservice.repository.InstructorRepository
+import com.kotlinspring.coursecatalogservice.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeEach
@@ -19,17 +18,23 @@ import org.springframework.web.util.UriComponentsBuilder
 @ActiveProfiles("test")
 class CourseControllerIntTest(
     @Autowired val webTestClient: WebTestClient,
-    @Autowired val courseRepository: CourseRepository
+    @Autowired val courseRepository: CourseRepository,
+    @Autowired val instructorRepository: InstructorRepository
 ) {
+    private var savedInstructorId = 0
+
     @BeforeEach
     fun setUp() {
+        instructorRepository.deleteAll()
+        savedInstructorId = instructorRepository.save(instructor()).id!!
+
         courseRepository.deleteAll()
-        courseRepository.saveAll(courseList())
+        courseRepository.saveAll(courseList(savedInstructorId))
     }
 
     @Test
     fun addCourse() {
-        val course = courseDTO()
+        val course = courseDTO(savedInstructorId)
 
         val result = webTestClient.post()
             .uri("/v1/courses")
@@ -61,10 +66,11 @@ class CourseControllerIntTest(
 
         val results = asObject<Result>(responseBody!!)
         assertThat(results.errors)
-            .hasSize(2)
+            .hasSize(3)
             .containsOnly(
                 "CourseDTO.name must not be blank",
-                "CourseDTO.category must not be blank"
+                "CourseDTO.category must not be blank",
+                "CourseDTO.instructorId must not be null"
             )
     }
 
@@ -116,8 +122,10 @@ class CourseControllerIntTest(
 
     @Test
     fun updateCourse() {
-        val updateCourseId = courseRepository.findAll().toList()[0].id
-        val updateCourseDTO = CourseDTO(updateCourseId, "New Course", "Business")
+        val course = courseRepository.findAll().first()
+        val updateCourseId = course.id
+        val instructorId = course.instructor!!.id
+        val updateCourseDTO = CourseDTO(updateCourseId, "New Course", "Business", instructorId)
 
         val result = webTestClient.put()
             .uri("/v1/courses/{course_id}", updateCourseId)
@@ -136,7 +144,7 @@ class CourseControllerIntTest(
     @Test
     fun updateCourseNotFound() {
         val updateCourseId = -1
-        val updateCourseDTO = CourseDTO(updateCourseId, "New Course", "Business")
+        val updateCourseDTO = CourseDTO(updateCourseId, "New Course", "Business", 1)
 
         val result = webTestClient.put()
             .uri("/v1/courses/{course_id}", updateCourseId)
@@ -154,7 +162,7 @@ class CourseControllerIntTest(
 
     @Test
     fun deleteCourse() {
-        val updateCourseId = courseRepository.findAll().toList()[0].id
+        val updateCourseId = courseRepository.findAll().first().id
 
         webTestClient.delete()
             .uri("/v1/courses/{course_id}", updateCourseId)
@@ -180,7 +188,3 @@ class CourseControllerIntTest(
             .isEqualTo("id not found")
     }
 }
-
-data class Result(
-    val errors: List<String>
-)

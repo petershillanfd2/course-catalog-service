@@ -26,7 +26,7 @@ private const val COURSE_NAME_EXPRESSION = "SpringBoot"
 @ActiveProfiles("test")
 class CourseControllerTest(@Autowired val mockMvc: MockMvc) {
     @MockkBean
-    lateinit var courseServiceMock: CourseService
+    private lateinit var courseServiceMock: CourseService
 
     @Test
     fun addCourse() {

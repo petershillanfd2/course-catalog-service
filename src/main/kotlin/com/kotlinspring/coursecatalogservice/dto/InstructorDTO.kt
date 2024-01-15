@@ -1,11 +1,10 @@
 package com.kotlinspring.coursecatalogservice.dto
 
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import com.fasterxml.jackson.annotation.JsonProperty
+import jakarta.validation.constraints.NotBlank
 
 data class InstructorDTO(
-    val id: Int?,
-    var name: String
+    @JsonProperty("id") val id: Int?,
+    @get:NotBlank(message = "InstructorDTO.name must not be blank")
+    @JsonProperty("name") var name: String
 )

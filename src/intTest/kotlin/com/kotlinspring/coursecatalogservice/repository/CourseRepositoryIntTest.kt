@@ -2,6 +2,7 @@ package com.kotlinspring.coursecatalogservice.repository
 
 import com.kotlinspring.coursecatalogservice.entity.Course
 import com.kotlinspring.coursecatalogservice.util.courseList
+import com.kotlinspring.coursecatalogservice.util.instructor
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -15,11 +16,19 @@ import java.util.stream.Stream
 
 @DataJpaTest
 @ActiveProfiles("test")
-class CourseRepositoryIntTest(@Autowired val courseRepository: CourseRepository) {
+class CourseRepositoryIntTest(
+    @Autowired val courseRepository: CourseRepository,
+    @Autowired val instructorRepository: InstructorRepository
+) {
+    private var savedInstructorId = 0
+
     @BeforeEach
     fun setUp() {
+        instructorRepository.deleteAll()
+        savedInstructorId = instructorRepository.save(instructor()).id!!
+
         courseRepository.deleteAll()
-        courseRepository.saveAll(courseList())
+        courseRepository.saveAll(courseList(savedInstructorId))
     }
 
     @Test
