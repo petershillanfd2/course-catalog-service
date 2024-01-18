@@ -20,6 +20,8 @@ repositories {
     mavenCentral()
 }
 
+extra["testcontainersVersion"] = "1.19.3"
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -37,6 +39,12 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("com.ninja-squad:springmockk:4.0.2")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.testcontainers:testcontainers-bom:${property("testcontainersVersion")}")
+    }
 }
 
 tasks.withType<KotlinCompile> {
@@ -81,6 +89,10 @@ configurations["intTestRuntimeOnly"].extendsFrom(
 
 dependencies {
     intTestImplementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    //test-containers
+    intTestImplementation("org.testcontainers:junit-jupiter")
+    intTestImplementation("org.testcontainers:postgresql")
 }
 
 val integrationTest = task<Test>("integrationTest") {
